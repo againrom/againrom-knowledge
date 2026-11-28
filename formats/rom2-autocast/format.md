@@ -366,3 +366,5 @@ The player support sweep heals only members of the builder's list +0xaa8 (the ca
 | (old & 0xfc) + low8(p2) | script action 10, which can store 3 | R2-ENGINE-1794 |
 
 For a Human built by `L2.00130`, a hire or a map Human, no direct call reaches the loader or the threshold setter: the Unit constructor's default name has length 0 and the setter would read the Unit slot +0x30; command +0x40, +0x44 and +0x4c are 0 after creation, with a book or a bow (R2-ENGINE-1795, amending R2-ENGINE-1606, R2-ENGINE-506, R2-ENGINE-1001, R2-ENGINE-1002 and R2-ENGINE-777; Medium).
+
+The step cell the Defend order stores (R2-ENGINE-1184) goes to command +0xa with prepared 1 and to the walk start L2.02867 (RU, Medium; R2-ENGINE-1929).

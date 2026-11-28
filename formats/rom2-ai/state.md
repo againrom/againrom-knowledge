@@ -157,7 +157,7 @@ and stops order 1 on the +0x90 arrival flag at the destination
 set it runs the idle planner, and with a null or self target it first takes the
 first unit of L2.02117 and runs the idle planner only when none is found
 (R2-ENGINE-1120). Byte +0x4c bit 8 has a bounded census of byte stores
-(R2-ENGINE-1122). A script action switch reaches Group methods; the case
+(R2-ENGINE-1122; its writers are one setter and three clearers, R2-ENGINE-1920, and the full write census is R2-ENGINE-1922). A script action switch reaches Group methods; the case
 routines read store only into a result array
 (R2-ENGINE-1123, R2-ENGINE-1124). The slot +0x34 blow and approach wrapper
 (R2-ENGINE-1125), the constant preference bytes (R2-ENGINE-1126), the standing
@@ -547,3 +547,10 @@ The RU reads of the route search loop, the group target scan, the defender list,
 In EN, Drain Life with a computed v of 0 or below skips the hit hook and the killer store (R2-ENGINE-1892, High EN arm, Medium RU and callers); in EN, action 6 selectors 1 and 18 store order 0xb at the member's cell and a circle record whose radius is raised to p1 when p1 is nonzero (selector 1 else session byte +0xa8b8, selector 18 else 0x14), and no member flag in the bodies read (R2-ENGINE-1893, High EN, Medium RU and unread helpers); the flee Teleport admission is R2-ENGINE-1880.
 
 The group programme byte stores are 17 byte sites per image with no immediate from 6 to 16 (High as a count, Medium as a complete cover; copies and loads of a group record are not covered; R2-ENGINE-1894); no body with the shape of a Druid patrol stage was found among the stores, the dispatch and six order handlers read (Medium; R2-ENGINE-1895); EN L2.08843 and L2.08844 are the only coordinate walkers the order dispatcher reaches, and EN L2.08845, with thresholds on x and a destination, has no reference in either image (High for the bodies, Medium for meaning, reachability Unknown; R2-ENGINE-1896); the position getter census is Medium and covers direct calls only (R2-ENGINE-1897); in EN a Darkness caster can be a hook target when it is the occupant picked (Medium; R2-ENGINE-1898).
+
+Order machine readings that cite claims of this page: R2-ENGINE-1923, R2-ENGINE-1924, R2-ENGINE-1925, R2-ENGINE-1926, R2-ENGINE-1927, R2-ENGINE-1928, R2-ENGINE-541. They give the stores of the unit-order selector arms and prepared handlers, the callers of the order setters, one script case that sets order 0xb, and the L key order body; each holds at the grade the claim names.
+
+Further order machine readings: R2-ENGINE-1929, R2-ENGINE-1930 and R2-ENGINE-1931 read the step cell of the Defend order and its executor handler, the EN order panel construction and enabled-button mask, and the walk start L2.02867; they refine R2-ENGINE-1184, R2-ENGINE-1191, R2-ENGINE-1623 and R2-ENGINE-1626 at the grades the claims name.
+
+
+Order machine readings that amend or reproduce claims of this page: R2-ENGINE-1123, R2-ENGINE-1624, R2-ENGINE-1896, R2-ENGINE-883. They read the setter callers, the script table cells, the walk start and the L key order, and narrow the amended claims at the grades their Amended lines name.

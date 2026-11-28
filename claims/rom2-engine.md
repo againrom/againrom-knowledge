@@ -22,6 +22,202 @@ table of `data.bin`, not a stored byte layout.
 `allods2.exe` and censuses of the installed ROM2 maps, scripts, text and sprite files. They describe
 what the load reads and which ROM1 grammars still parse, not a new stored byte layout.
 
+## ROM2 unit byte +0x4c bit 8: the writers and their callers (EXP-2215)
+
+| ID | Claim | Confidence | Status | Evidence |
+|---|---|---|---|---|
+| R2-ENGINE-1920 | Unit byte +0x4c bit 8 has one setter and three clearers, the same four byte stores in EN and RU: setter RU L2.04905 / EN L2.04906; clearers L2.08956, L2.08957 and the unit-record builder L2.01819 (EN L2.07384, L2.01848, L2.01818). | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1921 | The setter and the two placement clearers have 5, 1 and 5 direct callers in both programmes and no absolute reference; callers are group and building member lists (when object L2.01317 word +0x74 is nonzero), script cases and L2.08958. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1922 | Write census of +0x4c, RU 106 and EN 99 stores (RU 42 and EN 39 byte-wide): beside the four bit-8 sites, bytes OR-ed with 2, 4, 6 and 0x10 leave bit 8 alone; the other stores are not resolved to an object. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1923 | The unit-order selector (RU L2.01725, EN L2.02477) has 16 callee arms (14 outside 0x18 and 0x19) and 2 inline arms; 14 own bodies match in EN and RU (13 arms and the default arm); 8 arms store prepared +8; no body read stores unit +0x50. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1924 | Prepared dispatch (RU L2.01571, EN L2.02887): 12 handler bodies, equal in cells in EN and RU (handler 6 read to 256 instructions); 4, 7, 0xa, 0xc, 0xf store unit +0x54; in their own bodies only 1, 2 and 4 write +9. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1925 | Before the table the selector calls hook RU L2.01576 (EN L2.06233) for three order and target shapes; the hook stores 1 in command +0x50. Orders 0x17, 5, 6, 7, 9, 0x10, 0x12 to 0x15 and every order above 0x1b take one default arm. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1926 | The 19 RU order-setter entries of the +0x50 census carry 24 direct call sites; the order 4 setter L2.02878, a twentieth entry merged into L2.02809, is not censused; the 0x18, 0x19 and L2.02807 setters have none. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1927 | Script case RU L2.08360, called once from action runner L2.02490, moves a unit via L2.00093 and sets order 0xb when the unit's object +0x14 has +0x2c nonzero; the region's one +0x50 write is a word store on an element of unread class. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1928 | L key order (RU setter L2.02816, order 0x17): session method L2.06066 sets it for each unit of the selected list; no class or mana test in either body; units pass the dispatcher's two drops (R2-ENGINE-1198); default selector arm. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1929 | RU Defend step cell: L2.02401 stores prepared 1 and the cell at P+0xa; dispatch case 1 passes it to handler L2.02634, which calls L2.02867(unit, cell, 0) and stores state 1. EN L2.02401 not read. | High / Medium | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1930 | EN order panel built with (0, 0x9e, 0xa0, 0xee), read as a 0xa0 by 0x50 box; mask routine L2.06497 gives 0, 0xef or 0xff; only 4-byte 0x409 in the EN code section sends to +0xd4, owner not shown to hold the panel (+0xdc); RU not searched. | High / Medium / Unknown | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+| R2-ENGINE-1931 | RU walk start L2.02867 (k = 0) read; cell refusal lies in L2.05182 (read to its first exit test, R2-ENGINE-883), L2.08469, L2.03831, L2.08467; head of L2.01587 builds a region, tail unread; patrol on a held point, collect cadence Unknown. | High / Medium / Unknown | ● active | [EXP-2215](../experiments/EXP-2215-rom2-orders/) |
+
+### R2-ENGINE-1920
+
+Unit method RU L2.04905 (EN L2.04906) tests byte +0x4c against 8 and leaves at once when it is set. Otherwise it calls L2.02926 on the object at L2.02538 with the unit, ORs 8 into the byte, calls L2.04531 on world +4 and posts the unit twice through L2.05726 on the object at L2.02608. RU L2.08956 (EN L2.07384) takes (x, y, mode), calls the admission L2.00313 and, when it returns nonzero, inserts the unit through L2.00205 on the world at L2.00326, then ANDs the byte with 0xf7, then calls L2.00060 and L2.05726; with a zero return it raises an error object and returns 0. RU L2.08957 (EN L2.01848) takes the unit's own position from its position object [+0x10], tries L2.00313 with mode 0 and then 3, and on success runs the same insertion, the same AND 0xf7, then L2.08959, L2.00060 and L2.05726, and returns 1. RU L2.01819 (EN L2.01818) is a record-driven builder; after a call of the object's virtual slot +0x58 it ANDs the byte with 0xf7, stores word +0x18 = 0 and copies a record word at +0x30 to +0x1a4. The unit constructor RU L2.01794 stores the byte as 0 and allocates the blocks at +0x1c0 and +0x1c4 (Medium that this is the constructor of the same object). Three of the four windows are equal line by line in EN and RU after address masking; the fourth is equal up to its return.
+
+**Amends.** R2-ENGINE-1122 (its single or-8 site and three and-0xf7 sites are now read as bodies; their objects are the unit) and R2-ENGINE-1912 (the routine called on entry, L2.04906, is the setter of this bit; the claim's "off the map" is now a body, Medium for what the map shows).
+
+**Confidence.** High for the bodies and for the store set in the byte-width sweep. Medium for the meaning "the unit is out of the world": L2.02926, L2.04531, L2.05726, L2.00060, L2.08959 and the admission L2.00313 were read only as far as their first lines or not at all. The setter's exact effect on a unit the bit already marks is a skip.
+
+**Unknown.** What the bit does to targets of the reading sites besides R2-ENGINE-393, 477 and 616. A run of the original settles the display: hide and show a group with the script actions of R2-ENGINE-1921 and compare the unit's presence in the list of attack candidates.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass1/listings/ru-w L2.04905.txt`, `ru-w L2.08956.txt`, `ru-w L2.08957.txt`, `ru-w L2.08960.txt`, `ru-w L2.08961.txt`; `pass2/listings/en-w L2.04906.txt`, `en-w L2.07384.txt`, `en-w L2.01848.txt`, `en-w L2.08962.txt`; `pass4/listings/ru-w L2.01794.txt`, `ru-w L2.02926.txt`, `ru-w L2.00205.txt`; `derived/q2-bit8-byte-sites.tsv`.
+
+### R2-ENGINE-1921
+
+Direct calls (Capstone linear sweep of the code sections, both programmes; absolute 4-byte occurrences of the targets in every section: none): the setter RU L2.04905 is called from L2.08963, L2.08964, L2.08965, L2.08966 and L2.08967; the placement clearer L2.08956 only from L2.08968; the own-cell clearer L2.08957 from L2.08958, L2.08969, L2.08970, L2.08971 and L2.08972; the builder L2.01819 from L2.06895, L2.06896 and L2.06897. EN has the same counts (5, 1, 5 and 3). In the bodies read, L2.01638 (setter at its end, L2.08973 pairs the clearer) and the list method at L2.02763 call the setter after a list removal and the clearer after a list insertion, each only when word +0x74 of the object at L2.01317 is nonzero (R2-ENGINE-1912 reads that word as multiplayer, Medium). The routines L2.08974, L2.08975 (setter on the unit at event +0x5c, then placement of the unit at event +0x68 at the first unit's cell with mode 3), L2.08976 and L2.07412 (setter or clearer on every unit of the list at event +0x60) are script action cases. L2.01833 calls the clearer on the unit [+0x38] of an entry after a list insertion, under the same word.
+
+**Confidence.** High for the call sites and the absence of absolute references. Medium that these are all callers: a call through a register or a table that holds no 4-byte absolute address is outside the sweep. Medium for the labels of the list classes and script cases: the callers' bodies were read only around the call.
+
+**Unknown.** Which action numbers reach L2.08965..L2.08972 (table L2.06288 unread here), and which mission plays them. A run settles it: load a mission whose script hides and shows a group, and watch the bit.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass2/refs.tsv`, `pass3/listings/ru-c52ad8f.txt`, `ru-c5395d4.txt`, `ru-c58227c.txt`, `ru-c582294.txt`, `ru-c582857.txt`, `ru-c4f4bef.txt`, `ru-w L2.01819.txt`.
+
+### R2-ENGINE-1922
+
+The census (`evidence/census.py`, Capstone linear sweep with skipdata over every code-flagged section) lists every instruction with a written memory operand whose displacement and width cover +0x4c, and every LEA of +0x4c: RU 106 writes and 5 LEAs, EN 99 writes and 5 LEAs; byte-wide RU 42, EN 39; word 6 and 6; dword 58 and 54 (`derived/q2-write-classes.tsv`). Byte stores that read the byte, OR in an immediate and store it back use 2, 4, 6 and 0x10 (RU L2.06251, L2.06252, L2.06254, L2.06255, L2.06256, L2.06257, L2.06258, L2.06259, L2.06260, L2.06262, L2.06263) and leave bit 8 as it was. The byte stores of 1, 2 and 0 at L2.08977, L2.08978 and later in L2.02444 and L2.08979..L2.08980 write the block at unit +0x1c4 (command block), not the unit. L2.08981 writes a command block (+8, +9 and +0x71 beside it). RU L2.06253 copies the byte from a source unit to a destination in a copy routine (L2.00106). The remaining stores, among them 64 word and dword stores (zero stores at L2.06264, L2.06265, L2.06266, L2.06267, L2.06268 and `and dword,0` at L2.06269, L2.06270, L2.06271) and the byte zero stores at L2.08982, L2.08983, L2.08984, L2.08985, L2.08986, L2.08987, L2.08988 (word fields +0x48 and +0x4a beside them), belong to objects not resolved here.
+
+**Amends.** R2-ENGINE-1122's census is restated for both programmes with function entries and six preceding instructions; its 106 RU write operands are reproduced exactly (EN 99).
+
+**Confidence.** High for the census rows (second run equal byte for byte). Medium for the classes: only the four bit-8 sites and the sites named above were tied to an object. Not covered: REP MOVS, stores through a field address (the 5 LEAs), stores with an index split, desynchronised decoding inside data.
+
+**Unknown.** The object of each unresolved store; a read of the 60 function windows would settle it.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/census/sites-4c.tsv`, `counts.tsv`, `inputs.tsv`; `derived/q2-write-classes.tsv`; `pass1/listings/ru-w L2.02444.txt`, `ru-w L2.08989.txt`.
+
+### R2-ENGINE-1923
+
+The selector reads the order word at unit +0x50 and jumps through a 28-entry table. Its arms push the unit and, for some orders, fields of the command block P (the dword at unit +0x1c4). Own bodies of the 18 non-default entries (16 callee arms and the 2 inline arms; the table has 28 entries, 10 of them the default arm), with the cells each body itself stores (P is unit +0x1c4; offsets in hex):
+
+| Order | RU / EN body | Own stores in the body | Own reads |
+|---|---|---|---|
+| 0 | inline | unit +0x54 = 0 | none |
+| 1 walk | L2.02401 / L2.04961 | P+8 = 1, P+0xa = goal word argument | unit +0x1c4 |
+| 2 | L2.01730 / L2.08862 | P+8 = 7, P+0xa = word argument | unit +0x10 |
+| 3 | L2.01530 / L2.03461 | P+8 = 5 (two places), P+0xc and P+0x14 | session +0xa50, unit +0x10 and +0x14 |
+| 4 | L2.02440 / L2.08863 | none | unit +0x10; calls L2.01530 and L2.02401 |
+| 8 | L2.02907 / L2.06478 | none | P+8, P+0x70 |
+| 0xa | L2.02874 / L2.08861 | P+8 = 0, P+0, P+2, P+4 = 0 or 1 | P+2, P+8, P+0xb4 |
+| 0xb | L2.02439 / L2.08864 | none (11 instructions: one call to L2.02438) | none |
+| 0xc | L2.01731 / L2.05941 | none | [unit+0x1c0]+0 and +0x80 |
+| 0xd | L2.01524 / L2.06363 | P+8 = 8, P+0x14, P+0x28, P+0x30 | unit +0x1c4 |
+| 0xe | L2.01732 / L2.07820 | P+8 = 9, P+0x14, P+0x30, P+0x3c | unit +0x1c4 |
+| 0xf | L2.02875 / L2.03067 | P+8 = 0xf, P+0x68 | unit +0x1c4 |
+| 0x11 | L2.02873 / L2.08860 | none | P+0x70 |
+| 0x16 | L2.02449 / L2.07155 | none | [unit+0x1c0]+8 |
+| 0x18, 0x19 | L2.02864, L2.02872 / L2.08843, L2.08844 | see R2-ENGINE-1896 | |
+| 0x1a | L2.02865 / L2.06476 | P+8 = 0xc, P+0xa | unit +0x1c4 |
+| 0x1b | inline | unit +0x54 = 0x1b | none |
+
+The arms for 5, 6, 7, 9, 0x10, 0x12 to 0x15 and 0x17 and every order above 0x1b are the default arm (R2-ENGINE-1925). The 14 own bodies read in EN (13 arms and the default arm; orders 0x18 and 0x19 are R2-ENGINE-1896) compare equal to RU as sets of (base, offset, width, immediate) stores, reads and call-site counts, except order 0x16, whose EN body has 13 call sites against 5 in RU (the cell sets are equal; the extra EN sites were not read). Across the callees read from these arms (128 RU and 44 EN functions in the listings), no store to unit +0x50 occurs and unit +0x54 is stored only by the selector's own arms 0 and 0x1b and by the prepared handlers of R2-ENGINE-1924. Stores to P+8 in the callees of orders 3, 4, 8, 0xa, 0xb, 0x11, 0x18 reach the values 0, 5, 6, 8, 9 and 0xb (RU; EN only own bodies compared).
+
+**Amends.** None. Narrows R2-ENGINE-555 (the table) with the cells each body stores.
+
+**Confidence.** High for the own-body stores and reads (each is a decoded instruction with the unit reached through the selector's pushed argument). Medium for the base attribution of a store in a callee (linear scan of the body, branches not followed, registers tracked through simple moves), and Medium that no read callee stores unit +0x50: callees outside the listings (the L2.02502, L2.04689, L2.02117 family, L2.01728 and others the call tables list) were not read, and an indirect or later writer is not excluded. The EN comparison covers own bodies only.
+
+**Unknown.** What ends each order: the setters (R2-ENGINE-541) and the callers of the planners store unit +0x50; no read arm body does. A run of the original settles it: give each order once and watch unit +0x50 and +0x54 until they change, for 40 steps.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/q1/derived/cmp-arms/q1-arm-bodies.tsv`, `arms-ru/`, `arms-en/` (stores.tsv, reads.tsv, calls.tsv); listings `native/pass5/listings/en-sel L2.02477.txt`, `native/pass6/listings/en-o*.txt`, `native/pass7/listings/en-oc-tail.txt`; RU inputs `EXP-2070-rom2-order-cells/evidence/measured/listings/ru-selector.txt`, `ru-planners-*.txt`; scripts `q1_arms.py`, `q1_compare.py`, `q1/regen.sh`.
+
+### R2-ENGINE-1924
+
+The executor's prepared dispatch (RU table L2.01571, EN L2.02887) indexes the 15 cells by prepared byte minus 1. The handler bodies and the cells each stores in its own body (state is unit +0x54; P is unit +0x1c4; handlers have the same cell sets in EN and RU, handler 6 as a 256-instruction prefix):
+
+| Prepared | RU / EN handler | Own stores |
+|---|---|---|
+| 1 | L2.02634 / L2.05543 | state 1, [unit+0x1c0]+0x6c = 1, [unit+0x1c0]+9 = 0xff, P+0x15 = 0, P+9 = 3 |
+| 2 | L2.02407 / L2.05535 | state 3, unit +0x5c = P+0xc, P+0x15 = 0, P+9 = 1 |
+| 4 | L2.01577 / L2.05531 | state 1, P+0x15 = 0, P+9 = 3; takes P+0x18 as argument |
+| 5 | L2.02437 / L2.06208 | state 1 or 3 |
+| 6 | L2.02406 / L2.05523 | state 1 or 3, P+8 = 0 (first 256 instructions only; the window ends at RU L2.08990 and EN L2.08991 inside the body, so the cell set is a prefix) |
+| 7 | L2.01526 / L2.08992 | state 2 |
+| 8 | L2.01552 / L2.05525 | state 1 |
+| 9 | L2.02859 / L2.05528 | state 1 |
+| 0xa | L2.08993 / L2.08994 | state 0 or 1, P+8 = 0; takes byte [unit+0x1c0]+1 |
+| 0xb | L2.02430 / L2.06310 | state 0 or 1, [unit+0x1c0]+1, P+0x54 = 0 |
+| 0xc | L2.06659 / L2.08995 | state 0, 1 or 2, P+8 = 0 |
+| 0xf | L2.02632 / L2.02633 | state 0xf or 1; takes P+0x68 as argument |
+
+Prepared 3, 0xd and 0xe go to the common tail without a handler. Prepared 4, 7, 0xa, 0xc and 0xf had no handler row on the format page; the order bodies of R2-ENGINE-1923 store 7 (order 2), 0xc (order 0x1a) and 0xf (order 0xf); no read order body stores prepared 4 or 0xa, except the shared planners (4 by the closure of order 8).
+
+**Amends.** None. Adds handler rows to R2-ENGINE-883 and R2-ENGINE-556.
+
+**Confidence.** High for the dispatch table, handler addresses and the stores read in each body, with handler 6 limited to its first 256 instructions. Medium for the meaning of the state values 0, 2, 0xf (no consumer read) and for stores in callees (linear scan): the derived store table shows +9 stores reached from handlers 5, 6, 8 and 9 through the callees L2.01577, L2.02407, L2.01575 and L2.02634 (R2-ENGINE-556 reads L2.02407 as the strike initialiser reached from prepared 2, 5 and 6), so +9 is written outside handlers 1, 2 and 4 through callees.
+
+**Unknown.** What state 2 and 0xf do to the unit and who consumes them; an order 2 and an order 0xf given in the original, with unit +0x54 watched, settles it.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/q1/derived/cmp-prep/q1-arm-bodies.tsv`, `prep-ru/`, `prep-en/`; listings `native/pass8/listings/en-prep-arms.txt`, `native/pass9/listings/*.txt`; RU `EXP-2070-rom2-order-cells/evidence/measured/listings/ru-executor.txt`, `ru-prepared-handlers.txt`, `measured/tables.tsv`.
+
+### R2-ENGINE-1925
+
+Before it indexes the table the selector tests three shapes and calls the hook RU L2.01576 (EN L2.06233) with the unit: order 3 when the object at P+0xc has +0x54 equal to 0x10; order 8 or 0x11 when the object at P+0x10 has +0x54 equal to 0x10; order 1 when [unit+0x1c0]+0x90 is nonzero and the word [unit+0x1c0]+0x76 equals the low word of the unit cell value from L2.01521. The hook calls L2.01585(unit) and L2.02636(unit), then stores P+0x50 = 1; the next routine in the image calls L2.01585 and stores P+0x50 = 0. The table has entries 0 to 0x1b; the default arm (orders 5, 6, 7, 9, 0x10, 0x12 to 0x15, 0x17 and above 0x1b) stores unit +0x54 = 0 and calls L2.01733(unit, 0) (EN L2.04965).
+
+**Amends.** None. Reproduces R2-ENGINE-1121 for the shapes, the hook and the default arm. Supplies the default-arm population for R2-ENGINE-555.
+
+**Confidence.** High for the tests and the default arm. Medium for the meaning of object +0x54 = 0x10 and of P+0x50: L2.01585 and L2.02636 were not read. The default arm of order 0x17 is read in the selector, not in the L key setters.
+
+**Unknown.** What the hook's callees do to the target; a run that issues an attack at a building (kind 0x10 not named) settles it.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass6/listings/ru-pre.txt`, `en-pre.txt`, `pass5/listings/en-sel L2.02477.txt`; RU `EXP-2070-rom2-order-cells/evidence/measured/listings/ru-selector.txt`.
+
+### R2-ENGINE-1926
+
+The census took every RU setter entry that stores an order code in unit +0x50 (R2-ENGINE-541; entries from the +0x50 write census, `census/sites-50.tsv`, 19 distinct) and scanned the RU image for direct CALL, JMP and Jcc rel32 or rel8 targets and for any 4-byte absolute occurrence of each entry (Capstone linear sweep of code sections, all sections for absolutes). Direct call sites per entry: L2.02806 (order 1) 4; L2.02807 (order 1) 0; L2.02812 (3) 1; L2.02809 (0xf) 1; L2.02813 (0xd) 1; L2.02814 (0xe) 1; L2.02815 (0xb) 3; L2.02637 (0xc) 3; L2.02816 (0x17) 1; L2.02817 (8) 1; L2.02818 (0x11) 1; L2.02819, L2.02820 and L2.02821 (0xa) 1 each; L2.01579 (0x16) 1; L2.01580 (2) 2; L2.01581 (0x1a) 1; L2.01582 (0x18) 0; L2.01583 (0x19) 0. Total 24 over the 19 entries the census found. The order 4 store (L2.08996) lies in a separate setter L2.02878, a twentieth entry that the census merged into L2.02809 (the listing before L2.02878 decodes jump-table data); the callers of L2.02878 are not censused: L2.02915, in the planner of order 0x19, is one (R2-ENGINE-555). Callers by region: session methods L2.08997 to L2.08998 (17), message handler L2.08999, L2.09000, L2.09001 (3), the order 0x1a planner L2.02916 (calls the order 0xc setter), the stop chain L2.09002 (order 0xc, R2-ENGINE-1121), L2.09003 (order 0xa, in the code after the unreferenced L2.08870), and L2.09004 (order 0xb, in script case L2.08360, R2-ENGINE-1927).
+
+**Amends.** R2-ENGINE-541's statement "no window read calls L2.02813 (order 0xd)": RU L2.02813 has one direct call site (L2.08997). R2-ENGINE-1896: its callers of the setters of orders 0x18 and 0x19 not censused are censused here in RU (none; Medium).
+
+**Confidence.** High for the site list in RU (a measurement). Medium for completeness: a call through a register or a computed jump is not excluded, EN was not scanned, and the callers of L2.02878 are not censused. The absence of any caller of the order 0x18 and 0x19 setters bounds the evacuation planners of R2-ENGINE-1896 to unit +0x50 values stored by other forms (loads, copies); that is Medium.
+
+**Unknown.** Whether orders 0x18 and 0x19 reach a unit in play: a load of a mission with an evacuation scene, watching unit +0x50 for 0x18 and 0x19.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass11/refs.tsv`, `census/sites-50.tsv`; `EXP-2069-rom2-order-machine` listings for the setters.
+
+### R2-ENGINE-1927
+
+RU L2.08360 (read whole, L2.08360..L2.09005; the window began at L2.09006) loads a script record A: it calls L2.00093 on the object at session +0xa50 with the unit A+0x5c, byte A+8 and byte A+0xc; when the dword at [[A+0x5c]+0x14]+0x2c is nonzero it calls the order 0xb setter L2.02815 with that unit. The only direct call site of L2.08360 is L2.09007 inside the action runner L2.02490 (which saves an exception frame and a 0x178-byte local area; its action switch was not read). The committed `census/sites-50.tsv` (a disassembler sweep for direct displacement 0x50 operands; R2-ENGINE-541 cites the setter-window population) has one store in the script region L2.09008 to L2.09009, at L2.09010 in L2.09011: for each of up to six elements the cell query L2.00474 returns for the cell (A+0xc << 8) + A+8 whose word +0xc equals A+0x10, it stores word A+0x14 at element +0x50: one +0x50 word store on an element of a cell query, whose class is not read (Medium: not shown to be a unit; a word store is not the dword store the setters use, which favours a cell record). Action table L2.06288 holds 18 case addresses (L2.09012 to L2.09013), indexes 5 to 8, 11, 12 and 15 on the default L2.09013.
+
+**Amends.** R2-ENGINE-1123: its list of the cells of table L2.06288 and the call of L2.08360 from the head of L2.02490 as unread is narrowed to the 18 cells read here; the runner's switch and the other cases stay unread.
+
+**Confidence.** High for the two bodies and the census row. Medium that the element of the +0x50 word store is not a unit. Medium for the claim that no other script case sets a unit order: only direct stores to +0x50 are censused; orders are also set by setter calls, and the 24 sites of R2-ENGINE-1926 show only one in the region, but the Group methods the L2.06286 cases call (R2-ENGINE-1113) reach setters L2.08997 to L2.08998. The action number of L2.08360 is Unknown (the runner's switch was not read).
+
+**Unknown.** The action number and what it is named; run each script action once with a unit placed and watch unit +0x50 for 0xb.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass12/listings/ru-w L2.09006.txt`, `pass13/refs.tsv`, `pass14/listings/ru-w L2.02490.txt`, `pass15/listings/ru-w L2.08338.txt`, `pass10/listings/ru-w L2.09011.txt`, `pass10/dwords.tsv`.
+
+### R2-ENGINE-1928
+
+Session method RU L2.06066 (22 instructions) calls L2.02842 on the selected list, then walks the list with L2.04689 (first) and L2.04690 (next), calling the setter L2.02816 for each element, and finally stores byte 0x13 at [arg+0x3c]+0x20. The setter calls the reset L2.01584, stores 0x17 in unit +0x50, stores the low word of L2.01521(unit +0x10) (the unit's own cell value) at P+0 and the byte 0 at P+8. Neither body tests the unit's class, mana, owner or any flag. The selector has no arm of its own for order 0x17: it takes the default arm (R2-ENGINE-1925), which stores unit +0x54 = 0 and calls L2.01733(unit, 0).
+
+**Amends.** None. Reproduces R2-ENGINE-1198, R2-ENGINE-1199 (the setter tests nothing) and R2-ENGINE-1201 at the body level and leaves R2-ENGINE-1203 (the resume after a load) Unknown; the statement is in the orders page row "Setter callers and script cases", and the page section "The L key order (0x17)" is unchanged.
+
+**Confidence.** High for the two bodies. Who takes the order: the units that pass the dispatcher's two drops (an id whose unit has +0x54 = 0x10 or is not in the sender's list, R2-ENGINE-1198), then every member of the new Group (Medium; the list built by L2.02842, the message path from the key to type 0x12 (R2-ENGINE-541) and what L2.01733 does with order 0x17 were not read here). What ends the order: another write to unit +0x50, with no compare of 0x17 in the census (R2-ENGINE-1201, Medium). What a load restores is Unknown (R2-ENGINE-1203).
+
+**Unknown.** What a load restores (R2-ENGINE-1203): press L with a mage and a warrior selected, then step 40 times, comparing unit +0x50 and +0x54; save and load in between and compare the order and P+0. Static reads that narrow it: the list builder L2.02842, L2.01733 with order 0x17 and the save path of unit +0x50.
+
+**Evidence.** `experiments/EXP-2069-rom2-order-machine/evidence/measured/listings/ru-session-methods.txt` (L2.06066), `ru-order-setters-b.txt` (L2.02816); `experiments/EXP-2215-rom2-orders/evidence/q1/derived/arms-ru/` for the default arm.
+
+### R2-ENGINE-1929
+
+RU. The step cell of the Defend order (order 8, R2-ENGINE-1184) is consumed in three bodies. Cell helper L2.02454 returns the cell; planner L2.02907 passes it to L2.02401(unit, cell) (R2-ENGINE-1184), which stores byte 1 at P+8 and the cell word at P+0xa and nothing else (P is unit +0x1c4, 11 instructions). Prepared dispatch case 1 (RU L2.05251, dispatch at L2.09014) pushes 0, the word at P+0xa and the unit and calls handler L2.02634. The handler stores dword 1 at [unit+0x1c0]+0x6c; compares word [unit+0x1c0]+0x74 with the cell; when they differ it first stores 0xff at [unit+0x1c0]+9; then calls L2.02867(unit, cell, 0) on the object at executor +0xa50 on both paths; calls L2.00490 on unit +0x10 and, when it returns 0, stores 3 at P+9 and 0 at P+0x15; and stores unit state +0x54 = 1 (R2-ENGINE-1924 lists the same cells). The same L2.02401 is the walk call of the patrol planner (R2-ENGINE-1624) and of the pick-up planner (R2-ENGINE-1626).
+
+**Amends.** R2-ENGINE-1184: its sentence that the cell consumer and the executor of prepared 1 are unread is narrowed to the three bodies above; the cell value and its step-away rule are unchanged.
+
+**Confidence.** High for the three bodies and the dispatch case in RU. Medium that the executor object at +0xa50 is the one R2-ENGINE-1184 and R2-ENGINE-872 call the route object, and that L2.00490 is a movement test: both were read by use. EN has the same handler cells (R2-ENGINE-1924); the EN L2.02401 body was not read. R2-ENGINE-883 already reads that prepared 1 calls L2.02634 and L2.02867 and that L2.02867 tests the Chebyshev distance to the goal and the cached route. What L2.02867 does with the cell is R2-ENGINE-1931.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass16/listings/ru-w L2.02401.txt`, `ru-w L2.02634.txt`; `experiments/EXP-2070-rom2-order-cells/evidence/measured/listings/ru-executor.txt` lines 262 to 290 (dispatch and case 1).
+
+### R2-ENGINE-1930
+
+EN. The order panel (constructor L2.06637, vtable L2.06638, R2-ENGINE-1191) is built at L2.09015, inside a function whose start was not read, with arguments (6, 0, 0x9e, 0xa0, 0xee); its pointer is stored at [owner+0xdc]. The constructor passes (0, 0x9e, 0xa0, 0xee) through base constructor L2.00635 to L2.00636, which passes them to L2.00637 on the member at +8; that body was not read, so the order of the four values is not read. A second panel of class L2.00696 is built next with (7, 0, 0xee, 0xa0, 0x1e0). Read as left, top, right, bottom, the panel is 0xa0 by 0x50 at y 0x9e to 0xee, and the 8 hit-test boxes of R2-ENGINE-1191 (0x22 by 0x22 at x = left + (i and 3) x 0x22 + 8, y = top + (i shr 2) x 0x22 + 7) end at x 0x90 and y 0x4b inside it. Enabled buttons: the routine at L2.06497 returns 0 when [M+0x144] has bit value 4, else 0xef, or 0xff when [M+0x148] or [M+0x150] is nonzero (bit i of the mask is button i, bit 4 is the one outside 0xef). The only 4-byte 0x409 in the EN code section (`pass17/refs.tsv`: one hit at L2.09016; the other hits are in .rsrc; a 16-bit immediate, a computed message number and the RU image were not searched) is at L2.09017: the call sends (0x409, mask, 0) to [M+0xd4], the object at +0xd4 of [ebp-0x18], in a function that starts before the window, through its slot +0x48, and on the other branch (0x40a, 0, 0). Whether that owner is the one that holds the order panel at +0xdc is not shown; the value is the enabled-button mask only if the receiver is the order panel (its 0x409 slot stores the mask, R2-ENGINE-1191).
+
+**Amends.** R2-ENGINE-1191: its "which buttons are enabled ... are Unknown" is narrowed to the mask rule above, with the receiver of the mask open.
+
+**Confidence.** High for the constructor arguments, the call chain to L2.00637, the mask routine and the 0x409 site. Medium for the rectangle reading (L2.00637 unread; the fit of the boxes supports it). Unknown whether the object at +0xd4 is the order panel: the one found 0x409 immediate sends to +0xd4, the panel is stored at +0xdc, and the function around L2.09018 begins before the window read; the owner objects of the two functions were not shown to be the same. M is the object in [ebp-0x5c] there and its identity is unread. The RU panel was not read.
+
+**Unknown.** Which buttons are enabled in a mission, and the RU panel. Run the original EN mission and read the panel mask of the object at +0xdc after the view builds it, with a hero, a unit with a book and a unit with a bow selected.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass17/refs.tsv` (0x409 census: one .text hit), `native/pass17/listings/en-w L2.09019.txt`, `native/pass18/listings/en-w L2.00635.txt`, `en-w L2.09018.txt`, `en-w L2.06497.txt`, `native/pass19/listings/en-w L2.09020.txt`, `native/pass20/listings/en-w L2.00636.txt`.
+
+### R2-ENGINE-1931
+
+RU. Walk start L2.02867(unit, cell word, k) (200 instructions read, L2.02867 to L2.09021) is called by the handler of R2-ENGINE-1929 with k = 0. It takes a distance class c = L2.01522(own cell, cell) (R2-ENGINE-883 reads the same test as the Chebyshev distance to the goal; L2.01522 is unread here, Medium); when L2.00490 on unit +0x10 is 0 it calls L2.02848(unit) instead; when c is at most k it returns (with k nonzero after L2.05545); otherwise it adds 1 to the byte [unit+0x1c0]+0x78 and, when the cell differs from word [+0x74] or byte P+9 exceeds the dword at executor +0x5858c, calls the route search L2.05182(unit, x, y, 1, 0), stores [+0x90] = 0 and [+0x74] = cell and: with the route list at unit +0x1c8 empty (L2.06219) stores word [+0x76] = own cell, calls L2.05782 twice and stores [+0x98] = 1; otherwise stores [+0x76] = the list tail (L2.06351). It then clears P+9 and the list at unit +0x1e4 (L2.05193). The step part reads a next cell with L2.08469(unit), tests it with L2.03831(unit, cell, 0) and, when that is 0, calls L2.08467 on executor +0x58d80 with the unit and the cell. Which cell is refused when another unit holds it is decided in L2.05182, L2.08469, L2.03831 and L2.08467; L2.05182 is read only to its first exit test (R2-ENGINE-883) and the other three were not read. The patrol setter's call L2.01587 (R2-ENGINE-1623) clears 0x4000 bytes at the map object +0x24000, marks the own cell at +0x2a008, and loops over rings up to 0x14 around the cell calling L2.02414 and L2.02415 (120 instructions read, ending at L2.09022 inside the ring loop with no return): the head builds a region; its tail is unread and arrival stores are not excluded.
+
+**Amends.** R2-ENGINE-1626 and R2-ENGINE-1623: the "arrival store L2.01587" is not read as an arrival store; the head of L2.01587 builds a region and its tail is unread. R2-ENGINE-1624 gains the +0x98 and +0x78 stores of the walk start. R2-ENGINE-883: the Chebyshev reading of the distance test narrows to Medium.
+
+**Confidence.** High for the L2.02867 body read and the L2.01587 head. Medium that c is a distance class (L2.01522 unread), that [+0x98] is the no-route flag of R2-ENGINE-872, and that the tail of L2.01587 stores no arrival. Unknown what a patrol does when another unit stands on its point, and the pick-up collect cadence: no body read stores or reads an item.
+
+**Unknown.** Run the original RU mission: order a patrol whose far point is held by a standing unit and count steps until the patrolling unit stops, turns or alternates; order a pick-up on an adjacent sack and record unit +0x54 and the bag each step.
+
+**Evidence.** `experiments/EXP-2215-rom2-orders/evidence/native/pass20/listings/ru-w L2.02867.txt`, `ru-w L2.01587.txt`.
+
 ## ROM2 multiplayer return request, return penalty and building visits (EXP-2214)
 
 | ID | Claim | Confidence | Status | Evidence |
@@ -113,6 +309,8 @@ The request 0x3a arm L2.08935 finds U by word +5 and dword +0xa (L2.01661) and t
 
 **Unknown.** Which request value takes an offer (the offer kind stays Unknown, R2-ENGINE-536), the 0xfffd and other EN arms, the jump targets L2.08951 and L2.08952 (no list entry, no element), and the call after `push 3` in L2.01848 (the window ends at L2.08953). On EN allods2.exe host CROSS2 alone, enter an Inn, take one offer and leave once without one. Record the request bytes the client sends and the hero's cell after each exit.
 
+**Amended.** R2-ENGINE-1920 reads the body of L2.04906: it sets bit 8 of the unit byte +0x4c and calls L2.02926 and L2.04531 with the unit (helper bodies unread, so "off the map" stays Medium).
+
 **Amends.** R2-ENGINE-1843: its Unknown on what the two lookup targets are (L2.01637 and L2.02764, "unread"); R2-ENGINE-1912 reads their entry order, and names them in the cell-recording arms.
 
 **Evidence.** [EXP-2214](../experiments/EXP-2214-rom2-mp-return-buildings/RESULTS.md) questions 4 and 5: `evidence/generated/listings/en-q4-inn-methods-L2.02764.txt`, `en-q4-arm-3a-L2.08935.txt`, `en-q4-shop-method-L2.01637.txt`, `en-q4-unit-shop-L2.04906.txt`.
@@ -135,7 +333,7 @@ EN allods2.exe, actor step state-15 arm (committed EXP-2065 listing `en-unit-ste
 | R2-ENGINE-1893 | EN action 6 selectors 1 and 18: members get order 0xb at their own cell; the group record takes centre = group cell and a radius raised to p1 when p1 is nonzero (else +0xa8b8, selector 18: 0x14); no member flag in the bodies read. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
 | R2-ENGINE-1894 | EN and RU allods2.exe: 17 byte-width stores to a +0x20 operand with a non-esp base, the same sites in both; immediate values 0..5, 0x11..0x13, 0xff and one register store; none from 6 to 16. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
 | R2-ENGINE-1895 | No body with the shape of a Druid patrol stage found among the group programme byte stores, the programme dispatch (no route for 6 to 16) and six order handlers read. Bounded negative. | Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
-| R2-ENGINE-1896 | EN L2.08843 (order 0x18) and L2.08844 (order 0x19) are the only coordinate walkers the order dispatcher reaches; EN L2.08845, which tests x against 0x48, 0x55, 0x62 and sets a destination, has no reference in either image. | High / Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
+| R2-ENGINE-1896 | EN L2.08843 (order 0x18) and L2.08844 (order 0x19) are the only coordinate walkers the order dispatcher reaches; EN L2.08845, which tests x against 0x48, 0x55, 0x62 and sets a destination, has no reference in either image. | High / Medium | ● active (amended) | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
 | R2-ENGINE-1897 | Census of the unit position getters L2.00488 and L2.00489: 246 direct call sites in EN and 246 in RU, no absolute reference; 44 per image have a compare with an immediate within 10 instructions; stored results are not followed. | Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
 | R2-ENGINE-1898 | Darkness pulse, EN: the occupant routine has no caster-equals-target test, so the caster can be a hook target when it is the occupant picked; the hook then writes its +0x54, +0x58, +0x94, +0x98, +0x9c. | Medium | ● active | [EXP-2213](../experiments/EXP-2213-rom2-machine-five/) |
 
@@ -196,6 +394,8 @@ EN L2.08843 (the planner the unit order selector L2.02477 reaches for order 0x18
 **Unknown.** Who calls EN L2.08871 and L2.08872 and what fills session +0xbdee to +0xbdf3. A run of the original settles it: run a mission with an evacuation scene, watch unit +0x50 for 0x18 and 0x19 and the session bytes +0xbded to +0xbdf3 and +0xbdfc.
 
 **Amends.** None. Cites R2-ENGINE-628 and R2-ENGINE-1107; the stage writer and L2.08845 are unreferenced.
+
+**Amended.** R2-ENGINE-1926 censuses the direct callers of the RU setters of orders 0x18 and 0x19 (L2.01582, L2.01583): none, Medium (RU only; a call through a register is not excluded).
 
 **Evidence.** `experiments/EXP-2213-rom2-machine-five/evidence/native/pass2/listings/en-cmpx-L2.08873.txt`, `en-cmpx-L2.08874.txt`, `en-cmpx-L2.08875.txt`, `evidence/native/pass3/listings/ru-fn-L2.02864.txt`, `ru-fn-L2.02872.txt`, `evidence/derived/parity.tsv`, `evidence/refs/`.
 
@@ -14257,6 +14457,8 @@ Input chain: the message handler (RU L2.02840, jump table L2.02841, 21 entries i
 
 **Amended.** The command word +0xb0 is a destination cell copied from a cell record of kind 0x17 and consumed by the executor at +9 = 0; it is not a queued order (R2-ENGINE-557, Medium for completeness of its writers). The planner side includes the direct +9 clears and setter calls in R2-ENGINE-554 and R2-ENGINE-555. Unit +0x50 is the selector order code; command-object +0x50 is a separate field. The inherited RU setter listing shows L2.01576 -> L2.02636 -> L2.02637, which stores unit +0x50 = 0xc at L2.02881; L2.02882 then stores command-object +0x50 = 1. The latter is not unit order 1. No new setter acquisition was made. The ownership correction is recorded in `claims/retracted.md`.
 
+**Amended.** R2-ENGINE-1926 finds one direct call site of the order 0xd setter L2.02813 (L2.08997) and the callers of the 19 RU setter entries of the census (the order 4 setter L2.02878 is not censused); the callers of L2.02813 are no longer Unknown.
+
 **Evidence.** [EXP-2069](../experiments/EXP-2069-rom2-order-machine/RESULTS.md)
 
 ### R2-ENGINE-542
@@ -26353,7 +26555,7 @@ the differing pushes and the RU-inserted tests mean is unread.
 | R2-ENGINE-880 | On an empty route the ROM2 executor tail's order-1 arm L2.02858 stops the unit (L2.01585) and gives it order 0xc, cmd word +0 = its cell and cmd +8 = 0 (L2.02636, L2.02637). | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 | R2-ENGINE-881 | The 7 census-traced ROM2 writes of target cmd +0x20 per root lie in group assignment L2.05172, L2.02424 and L2.05173: 0 with no member or enemy, the least-score enemy, or 0 when all are excluded. | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 | R2-ENGINE-882 | ROM2 group programme handlers 0, 2, 3, 4, 5, 17, 19 and 0xff (bodies read) contain no access to stamp +0x16, movement +0x98 or hit fields; callees unread; among programmes 0, 2 to 5, 17 to 19 and 0xff only guard B (18) steps away. | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
-| R2-ENGINE-883 | With cmd +0x9c = 0, ROM2 guard B's walk sends the member toward cell 0: prepared 1 calls L2.02634 and walk L2.02867, and no read body tests the goal before the route search (composed). | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
+| R2-ENGINE-883 | With cmd +0x9c = 0, ROM2 guard B's walk sends the member toward cell 0: prepared 1 calls L2.02634 and walk L2.02867, and no read body tests the goal before the route search (composed). | High / Medium | ● active (branch candidate, amended) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 | R2-ENGINE-884 | ROM2 grouped creatures in five mission-10 saves hold order 0xb (138 of 139 Unit-class), so an empty route takes the tail's re-pick at the saved ticks; thresholds may come from Units rows (Medium); with +0xd8 = 1, RU L2.05178 halves +0x44. | High / Medium | ● active (branch candidate) | [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md) |
 
 ### R2-ENGINE-871
@@ -26734,6 +26936,8 @@ blocks), not a constructor read.
 
 **Amends.** R2-ENGINE-824's and R2-ENGINE-874's open case of a walk to cell 0
 (the zero goal reaches the route search unchanged).
+
+**Amended.** R2-ENGINE-1929 and R2-ENGINE-1931 read the body of L2.02634 and 200 instructions of L2.02867: the distance test is a class c from L2.01522 (unread) against k, so the Chebyshev reading narrows to Medium; L2.05182 is read only to its first exit test.
 
 **Evidence.** [EXP-2123](../experiments/EXP-2123-rom2-guard-reads/RESULTS.md)
 
@@ -27895,8 +28099,8 @@ questions 2 and 3; `evidence/run-2-player.tsv`, `evidence/run-3-player.tsv`,
 | R2-ENGINE-1115 | ROM2 body comparisons close the 20 setter twins, while mismatches and ambiguous twins remain. | High / Medium | ● active | [EXP-2152](../experiments/EXP-2152-rom2-order-machine-4/) |
 | R2-ENGINE-1120 | ROM2 attack planner L2.01530 stores no order; target +0x4c bit 8 set runs the idle planner, a null or self target only if no first unit is found. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1121 | ROM2 selector stops order 3 through L2.01576 when target +0x54 is 0x10; order 1 stops on +0x90 arrival. | High / Medium | ● active (amended) | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
-| R2-ENGINE-1122 | RU byte +0x4c bit 8: one or-8 and three and-0xf7 sites among byte stores with a nearby bit operation; wide stores unclassified; meaning open. | Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
-| R2-ENGINE-1123 | RU script cases store into a result array; a script action switch calls eleven Group methods; no +0xbbec operand read. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
+| R2-ENGINE-1122 | RU byte +0x4c bit 8: one or-8 and three and-0xf7 sites among byte stores with a nearby bit operation; wide stores unclassified; meaning open. | Medium | ● active (amended) | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
+| R2-ENGINE-1123 | RU script cases store into a result array; a script action switch calls eleven Group methods; no +0xbbec operand read. | High / Medium | ● active (amended) | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1124 | RU L2.06060 has three E8 sites (input, a Group method, the script action switch); L2.01724 has no reference in six forms. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1125 | RU slot +0x34 blow subtracts a helper result from target word +0x42; approach wrapper sets step and state 1. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
 | R2-ENGINE-1126 | ROM2 AI constructor L2.06231 writes the 16 scorer preference bytes as constants 2,1,2,4,4,2,1,0,2,1,4,0,2,1,2,4. | High / Medium | ● active | [EXP-2153](../experiments/EXP-2153-rom2-order-machine-5/) |
@@ -28329,6 +28533,8 @@ Population: RU allods2.exe .text, Capstone linear sweep. scan/ru-bitctx-unit-4c-
 
 **Amends.** R2-ENGINE-651's open event meaning: the byte-store sweep finds one or-8 site and three and-0xf7 sites, not an event name.
 
+**Amended.** R2-ENGINE-1920 reads the four byte stores as bodies in EN and RU (the objects are the unit; one setter, three clearers) and R2-ENGINE-1922 reproduces the RU write count and adds EN.
+
 **Evidence.** EXP-2153 generated/scan/ru-bitctx-unit-4c-bit8.tsv and scan/ru-census-pass1.tsv.
 
 ### R2-ENGINE-1123
@@ -28342,6 +28548,8 @@ L2.06061 (18, whole) calls L2.06283(0) on each of count consecutive 0x54-byte el
 **Unknown.** Readers of +0xbbec records among the unread routines; which action value selects which Group method. Read L2.06290..L2.00484 onward, L2.02490, L2.06283 and table L2.06288.
 
 **Amends.** R2-ENGINE-1045's unread jump table and helpers and R2-ENGINE-1021's open readers are narrowed to the routines listed as unread.
+
+**Amended.** R2-ENGINE-1927 reads the 18 cells of table L2.06288 and the call of L2.08360 from the head of L2.02490, which this claim lists as unread; the runner's switch and the other cases stay unread.
 
 **Evidence.** EXP-2153 generated/tables/ru-script-switch.tsv, win/ru-script-cases-a.lst, ru-record-release.lst, ru-list-free.lst, ru-script-list-b.lst, ru-caller-L2.06070.lst, scan/ru-refs-pass3.tsv; EXP-2146 ru-reader-L2.03275.lst (arm calls of L2.03275).
 
@@ -28724,7 +28932,7 @@ R2-ENGINE-526 supplies, at High for the selected owner loop / Medium for party r
 | R2-ENGINE-1181 | ROM2 app key routine EN L2.06472 / RU L2.06473 sets the Ctrl and Shift flags and handles Pause, Esc, F1, F2, F3, Num+ and Num-; keypad digits go on as 0x30..0x39; RU F2 and F3 add network-state conditions. | High / Medium / Unknown | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1182 | ROM2 Num+ and Num- step speed index app +0x41c (RU +0x434) by 1 within 0..8; EN jump table L2.03207 leads to nine arms that store 8, 10, 12, 14, 16, 20, 24, 28, 32 for 0..8, and app +0x418 = 1000 / that value. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1183 | ROM2 order 0x1a planner RU L2.02865 / EN L2.06476 searches square rings around the unit out to its byte +0xa5 for a cell L2.06477 accepts; a hit sets cell +0xa and prepared +8 = 0xc, none calls the order-0xc setter. | High / Medium | ● active (amended) | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
-| R2-ENGINE-1184 | ROM2 order 8 planner RU L2.02907 / EN L2.06478 approaches beyond range r = command byte +0x70, else runs two helpers; at distance < 2 with prepared +8 7 or outside 5..9 it steps r cells away; no read body reads a facing field. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
+| R2-ENGINE-1184 | ROM2 order 8 planner RU L2.02907 / EN L2.06478 approaches beyond range r = command byte +0x70, else runs two helpers; at distance < 2 with prepared +8 7 or outside 5..9 it steps r cells away; no read body reads a facing field. | High / Medium | ● active (amended) | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1185 | Within r, ROM2 order 8 plans spell 0x18 on the defended unit when +0x94 is below +0x96 (or half) and the cost fits +0x9a; else it attacks the nearest member of list L2.03475, kind 3 first; with an empty list it calls L2.01733(defender, 0). | High / Medium / Unknown | ● active (amended) | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 | R2-ENGINE-1186 | RU readme.txt lists 46 key entries; 39 have an arm in the read ROM2 key routines with the stated key and condition; Tab, Ctrl+A, Shift+1..9, Alt+F4 and the held Alt, Ctrl and Shift have none there. | High / Medium | ● active | [EXP-2159](../experiments/EXP-2159-rom2-mission-keys/) |
 
@@ -28842,6 +29050,8 @@ The planner holds no state of its own beyond the stores above; how often the sel
 
 ### R2-ENGINE-1184
 
+**Amended.** R2-ENGINE-1929 reads the cell consumer and the executor of prepared 1 (RU): the cell goes to P+0xa and to handler L2.02634, which calls L2.02867.
+
 RU addresses; EN `L2.06478` is masked-equal (111 instructions), as are the approach `L2.02909` / EN `L2.06551` (28) and the cell helper `L2.02454` / EN `L2.06552` (142).
 
 - r = command (unit +0x1c4) byte +0x70, read at `L2.06553`. d = `L2.02442`(map, cells of defender and defended from `L2.00486`/`L2.00487`), at `L2.06554`.
@@ -28892,7 +29102,7 @@ The text's actions (M move, A attack, G guard, D defend, S move in combat readin
 | R2-ENGINE-1188 | ROM2 Defend list L2.03475 is rebuilt on every call from units within r of the defended unit's cell (r = byte +8 of its +0x1c0 object), then filtered; this path reads the map's shared scratch list, not a list stored for the unit. | High / Medium | ● active (amended) | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1189 | With an empty Defend list ROM2 order 8 reads as calling L2.01733(defender, 0), whose idle planner stores no order itself; selected branch prepares 6, default 0xb, 0 or a mage helper (Medium); RU L2.02907 has one direct caller, L2.06587. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1190 | ROM2 view mode +0x9b4 sets the cursor (1 cc4, 2 cbc, 4 cc8, 5 cd4, 6 cc0, 8 cd0; 3 and 7 none); a click sends by cursor, and a nonzero mode then stores 0 (0x40b post Medium); no setter path holds mode 8 (cd0 source Unknown). | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
-| R2-ENGINE-1191 | ROM2 EN order panel (app +0xdc) has 8 buttons (hit-test geometry); a press (0x201, read as left) on button i sends 0x40c(i), the view calls L2.04359(i+1), which stores the mode under its mask; k = 3, 7 and 8 reach a sender, then mode 0. | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
+| R2-ENGINE-1191 | ROM2 EN order panel (app +0xdc) has 8 buttons (hit-test geometry); a press (0x201, read as left) on button i sends 0x40c(i), the view calls L2.04359(i+1), which stores the mode under its mask; k = 3, 7 and 8 reach a sender, then mode 0. | High / Medium / Unknown | ● active (amended) | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1192 | RU prepared 4 reads as calling L2.01578 toward command +0x18; 0xc as walking to cell +0xa, waiting a call, clearing prepared (handler map Medium); the 0x1a planner stores the last appended cell, if L2.06588 counts nodes in +0xc. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1193 | ROM2 EN L2.06589 clears the Shift, Ctrl and Alt flags and sends nothing to app +0xcc in its own body (calls unread routines); view slot +0x6c is L2.04345; cells 0xbc..0xc0 are 0x12 x4, 0x11 (both roots); EN forwards 0xc0, drops 0xbc..0xbf. | High / Medium / Unknown | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
 | R2-ENGINE-1194 | ROM2 RU E routine L2.06590 has the structure of EN L2.06530 (class handle and callee are twins by offset, Medium); RU Alt routine L2.06591 differs from EN L2.01073 only in operands; RU speed cells give 8..32 as EN. | High / Medium | ● active | [EXP-2160](../experiments/EXP-2160-rom2-order-senders/) |
@@ -29020,6 +29230,8 @@ R2-ENGINE-1107's RU input switch maps the types to orders:
 **Evidence.** EXP-2160 `evidence/generated/win/*-cursor-mode.lst`, `*-click-routine.lst`, `*-senders-a.lst`, `*-senders-b.lst`, `*-pickup-sender.lst`, `generated/tables/*-mode-cursor-table.tsv`, `generated/mask/*.tsv`, `generated/scan/*-census-mode-and-toggles.tsv`.
 
 ### R2-ENGINE-1191
+
+**Amended.** R2-ENGINE-1930 reads the enabled-button mask routine L2.06497, the panel construction arguments and the one 0x409 sender (receiver at +0xd4, open).
 
 **Mouse routing.** In the base message routine EN `L2.00913` / RU `L2.00914` (244 lines, masked-equal), mouse messages go to the child at +0x34 when it is nonzero. When +0x34 is 0, the routine calls forwarder `L2.00915`, and the object's own slots run only when the result is 0 (`jne L2.06636`): 0x200 to +0x4c, 0x400 to +0x50, and 0x201..0x206 through table `L2.01937` (6 cells, EN) to +0x54, +0x58, +0x5c, +0x60, +0x64 and +0x68.
 
@@ -36805,10 +37017,10 @@ Medium (archive opener unread, no original run). Medium for case-insensitive res
 | R2-ENGINE-1620 | RU bodies read, no original run: ROM2 order 0xb keeps a post (own cell if centred, else block word +6), walks back at Chebyshev distance >= ScanRange and attacks hostiles within block byte +8 of it (Medium in play). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1621 | RU bodies read, no original run: ROM2 player guard (input 0x17) sets group radius = max over members of (Chebyshev distance to their mean cell + ScanRange), at least MinimalGuardRange (8, Medium); it grows with spread (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1622 | RU ROM2 Guard A latches +0x2d = +0x38 + 4 + draw: -1..1 if the divisor at `L2.02421`'s `this` is 0x8000, -1..2 if 0x7fff (Unknown); a lone unit with ScanRange <= 8 and MinimalGuardRange 8 (Medium) gets 12 + draw. | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
-| R2-ENGINE-1623 | RU bodies read, no original run: ROM2 patrol (input 0x1d, order 0xa) stores a two-point list per unit, its own cell then the clicked cell; the clicked cell is the first target and the post is the own cell. | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
-| R2-ENGINE-1624 | RU bodies read, no original run: ROM2 patrol moves on at exact arrival or on an empty route within Chebyshev 3; farther away the unit stays, resets its post and retries the same point (Medium composition). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
+| R2-ENGINE-1623 | RU bodies read, no original run: ROM2 patrol (input 0x1d, order 0xa) stores a two-point list per unit, its own cell then the clicked cell; the clicked cell is the first target and the post is the own cell. | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
+| R2-ENGINE-1624 | RU bodies read, no original run: ROM2 patrol moves on at exact arrival or on an empty route within Chebyshev 3; farther away the unit stays, resets its post and retries the same point (Medium composition). | High / Medium | ✔ promoted (branch candidate, amended) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1625 | RU bodies, no run: ROM2 pick-up: a ring cell needs a record with nonzero +0x10 and a footprint passing `L2.02114`, the centre cell the record test alone (R2-ENGINE-1192); no route test in bodies read, `L2.03520`, `L2.03519` unread (Medium). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
-| R2-ENGINE-1626 | RU ROM2 input 0x13 (key P) sets order 0x1a, input 0x21 sets order 2; with no accepted cell 0x1a stands (order 0xc); an arrived order 2 takes state 2 for one call, then the stop chain; no read body takes an item. | High / Medium / Unknown | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
+| R2-ENGINE-1626 | RU ROM2 input 0x13 (key P) sets order 0x1a, input 0x21 sets order 2; with no accepted cell 0x1a stands (order 0xc); an arrived order 2 takes state 2 for one call, then the stop chain; no read body takes an item. | High / Medium / Unknown | ✔ promoted (branch candidate, amended) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1627 | RU ROM2 orders 0xc and 0x17 end only when another write replaces order +0x50 in the bodies read; a player mage on 0x17 may cast support spells in a 256-instruction window (five edges open); no RU input cell is a hold, EN unread. | Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1628 | RU bodies read, no original run: ROM2 player mage with a found target casts its selected spell (command +0x78) only when the book holds it and mana >= cost; otherwise it strikes or turns at weapon range +0x12c (Medium in play). | High / Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
 | R2-ENGINE-1629 | RU ROM2 idle-mage switch L2.01527: ids 1, 5, 10, 11, 16, 26 cast at the target, 24 Heal and 18/28 use own arms, ids 4, 8, 9, 12..15, 17, 19..21, 23, 29 cast nothing; the id-to-arm map comes from byte tables not preserved. | Medium | ✔ promoted (branch candidate) | [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) |
@@ -36890,6 +37102,8 @@ guard orders.
 
 ### R2-ENGINE-1623
 
+**Amended.** R2-ENGINE-1931 reads the head of L2.01587 (120 instructions, ending inside a loop): a region build over rings up to 0x14; its tail is unread and arrival stores are not excluded.
+
 Input type 0x1d reaches `L2.06218`(group, x, y): it resets the selected members (`L2.02842`) and calls `L2.02819`
 on each. The setter resets the unit, stores unit order 0xa, post word +0 = own cell, then empties the point list at
 command +0xb4 (`L2.05193`), adds the own cell at the head (`L2.05229`) and the cell y*256 + x of the order at the
@@ -36924,6 +37138,8 @@ a composition of these bodies: it is not a read run.
 **Unknown.** How long the unit retries and whether an empty route recurs each call. An original run settles it:
 patrol across a wall, a river or a closed gate, and record where the unit stands and whether it ever turns back.
 
+**Amended.** R2-ENGINE-1931 reads the walk start L2.02867 that the walk call L2.02401 reaches through prepared 1: it adds 1 to byte [+0x78] per call and stores the no-route flag [+0x98] = 1 on an empty route list.
+
 **Evidence.** [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) `evidence/generated/win/ru-order-a-L2.02874.txt`,
 `ru-tail-L2.02883.txt`, `ru-list-next-L2.08125.txt`, `ru-list-L2.08126.txt`.
 
@@ -36952,6 +37168,8 @@ cells, the `L2.02114` footprint test above.
 **Evidence.** [EXP-2194](../experiments/EXP-2194-rom2-orders-auto/RESULTS.md) `evidence/generated/win/ru-pickaccept-L2.02114.txt`.
 
 ### R2-ENGINE-1626
+
+**Amended.** R2-ENGINE-1931 reads the head of L2.01587 as a region build (its tail is unread and arrival stores are not excluded); R2-ENGINE-1929 reads the walk call L2.02401 and its executor handler.
 
 Input type 0x13 (key P, R2-ENGINE-806) reaches setter `L2.01581` (order 0x1a, R2-ENGINE-1107). Type 0x21 reaches
 `L2.01580`(unit, x, y): reset, unit order 2, cell word +0xa = y*256 + x, movement +0x90 = 0, prepared +8 = 0.
