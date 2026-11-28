@@ -100,3 +100,5 @@ slot for damage kinds 1..5 (High as code; Medium for the school paid in play). â
 of the argument-0 callers on a group's notice radius. The code default is 10; **the shipped file sets 8**. The file has four
 records in total and its other scalar, `[Tasker] IntelligentCons` = 15, has no literal anywhere in
 the image â€” nothing reads it.
+
+Each of the five `R0020` calls in the six cast-chain windows centres on the actor's own cell (AI-862, Medium).

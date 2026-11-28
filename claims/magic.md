@@ -5386,7 +5386,7 @@ Evidence is a static read of `rom.exe` (one image, SHA256 `942e9b72610eeba2f3d74
 
 | ID | Claim | Confidence | Status | Evidence |
 |---|---|---|---|---|
-| MAGIC-463 | A staged AreaEffect built in a world step's actor pass is first driven in a later step's area pass: stage k on relative step 1 + 3k (Medium); a DirectDamage occupant loses health in the stage call (Medium). | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
+| MAGIC-463 | A staged AreaEffect built in a world step's actor pass is first driven in a later step's area pass: stage k on relative step 1 + 3k (Medium); a DirectDamage occupant loses health in the stage call (Medium). | High / Medium | ● active (amended) | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
 | MAGIC-464 | A body's attachments tick before the health branch, so poison keeps lowering a fallen unit's health; health at or below -10 sets action 0x10 only after the death countdown ends. | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
 | MAGIC-465 | A hero mage's book Heal at a hostile Player's unit has paid mana at admission and, when `ebp-0x10` is 0, trains the school before the per-id dispatch; the Heal arm's diplomacy test then skips the heal (Medium). | High / Medium | ● active | [EXP-0650](../experiments/EXP-0650-rom1-fidelity-unknowns/) |
 
@@ -5402,6 +5402,8 @@ Listings `evidence/nav/p1/q2-world-step-R0193.txt`, `evidence/nav/p1/q2-area-cto
 **Confidence.** High for the step order, the constructor and the driver branch read whole. Medium for step 1: the caller of the list append `R0647` for this spell is not read, so a registration that drives the entry at once is not excluded. Medium that a Fire Sacrifice occupant loses health in the stage call: the `vt+0x3c` body of the DirectDamage object is not read. Medium for Meteor Storm and Acid Stream health writes: their inner Effect classes are not read.
 
 **Amends.** `MAGIC-AREAPULSE-037`, `MAGIC-RING-048`: stage 0 runs on the step after the applying step, not on it (Medium).
+
+**Amended.** By `AI-870`: the caller of the list append `R0647` for this arm is `R1113` at `L05395`, a list append with no drive call in the instructions read (the callees `L18244`, `R0540`, `R2248` and the arm at `L03053` are unread); the DirectDamage `vt+0x3c` body `R0564` is read and subtracts health in the stage call, with the slot identity taken from `UNIT-AREADIRECT-072`.
 
 **Unknown.** Settle with the original: cast Fire Sacrifice beside a unit and record the world counter (`+4` of the step object) on the step whose actor pass applies the cast and on each step the unit's health word changes; repeat with Acid Stream and Meteor Storm.
 

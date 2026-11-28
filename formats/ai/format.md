@@ -51,3 +51,5 @@ byte order are stated separately in the relevant layouts.
 The Heal candidate list can hold the caster (Medium), which is never the pick at full health. — AI-800
 
 A hero mage's book Heal at a hostile unit has paid mana and, under the prelude's gate, trains the school; the Heal arm then skips the heal (Medium: diplomacy polarity and admission target tests unread). — MAGIC-465
+
+Each of the five `R0020` calls in the six cast-chain windows centres on the actor's own cell (AI-862; AI-796, Medium); the Heal list's cell lookup returns slot `+4`, the actor of movement domain 1 or 2 (AI-866; AI-800, Medium); that list is built by bodies that load none of the six health and state offsets searched (AI-872, Medium).

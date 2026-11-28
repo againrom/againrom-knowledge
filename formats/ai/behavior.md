@@ -377,11 +377,12 @@ not widen the cap; the standing acquisition's stamps clear the mark after the 21
 under `MAGIC-445`'s caster and `+0x14` conditions, and lowers sight only on Humanoids and Humans; Light does neither of the first
 two and lowers sight only on plain Units. — MAGIC-445, MAGIC-446
 
-The tail has no test between the caster and the unit (High). If the area loops pass the caster,
-a caster standing in its own Darkness credits itself, and the hook sets its turn flag, its own cell
+The tail has no test between the caster and the unit (High). The three area loops pass their own
+area object, whose `+0x3c` holds the caster when the caster's own `+0x3c` is nonzero at the cast
+(AI-867). A caster standing in its own Darkness credits itself, and the hook sets its turn flag, its own cell
 as the remembered cell and the stamp count 0; the diplomacy flip then finds the locked diagonal and
-writes nothing. That the loops pass the caster, the result of `R0416` for it and the diagonal
-byte are Medium. — AI-829
+writes nothing. That the area still holds the caster in later stages and the diagonal byte are
+Medium. — AI-829
 
 **Alert between groups.** Nothing reached from the hook, the builder or the arms writes another
 group's order, cell or members. An alert crosses groups only through the player-level diplomacy
@@ -494,7 +495,7 @@ The computer mage's Heal candidate list is built with no identity test, so it ca
 
 A guard post scans the block of radius `mover+8` about its post cell and engages the first listed hostile; a defender's cover scans `mover+8` of the protected unit about that unit. The byte is passed as read, with no default branch; the constructor's 5 is the only store of it found by identity, and the sweep that found it leaves other writers open (Medium). — AI-810, AI-811
 
-Defender cover removes fliers when the protected unit's reach is below 2, then engages the nearest flier if one remains, else the nearest unit. Health and state are not read in that ranking; the occupant source and the engage routine are unread (Medium). — AI-812
+Defender cover removes fliers when the protected unit's reach is below 2, then engages the nearest flier if one remains, else the nearest unit. Health and state are not read in that ranking, in the block builder that feeds it or in the engage routine, so a unit that is still in a cell record is a candidate whatever its health (AI-872; the six offsets searched, Medium; whether a dying unit is still in its cell record is unread). The block builder lists slot `+4` only, so the flier branch of cover is reached only by a slot `+4` unit whose `vt+0x20` is 3, which is unread (AI-866, AI-812). — AI-812
 
 The defender and the invisibility test measure distance edge to edge in sub-cell steps, rounded down, plus 1. — AI-813
 
@@ -503,3 +504,5 @@ Group target ties keep the first scanned candidate of equal cost, scanning membe
 The retreat check passes the wounded unit as decider; an invisible enemy stays a candidate when any groupmate's See-invisible byte is at least that distance. — AI-815. The filter `R0021` stores list-node words through its list argument (read as candidate links, Medium), has no order-word store in its own instructions, and calls `R0036` and `R1355`. — AI-849
 
 No withdrawal-specific automatic Teleport branch was found in the decoded retreat tail and caster routines (Medium; undecoded callees and nine immediate sites are named in the claim). The cast table has a Teleport arm for id 26 (MAGIC-238) reached by the ordinary pick, and this negative says nothing about that path. — AI-816
+
+Each of the five `R0020` calls in the six chain windows centres on the actor's own cell (AI-862; the chain's count negative is AI-796, Medium). The block's cell lookup returns slot `+4`, the ground-actor slot of the cell record, so a domain-3 actor is not in the Heal list (AI-866; whether domain 3 is the flier class is Medium, MOVE-DOM-024; the caster is listed when registered, Medium, AI-800). The in-position gate passes when the actor faces the target's direction and the edge distance is within reach (AI-865; AI-798). A refused reacquisition of an AI-owned unit sets `ord+8` to 0xb and runs an idle turn, leaving the target pointer (AI-864). The executor body holds two timer-import calls and two table jumps, and the admission body and three direct callees of the admission hold one size-getter call; the executor's direct callees are not read for indirect calls (AI-868, Medium; AI-718). A Prismatic Spray list-B entry is not selected while list A is non-empty (AI-863, Medium: the footprint getter is unread). The Spray scratch lives in an object of 0xc320 bytes, so its capacity is at most 11627 dwords (AI-871, capacity Unknown; AI-SPRAY-266).

@@ -43,7 +43,7 @@ equipment, script, save and external-effect changes are outside this statement.
    participant's unit (`AI-715`). The mage's cast arm targets itself when damaged, else the first
    kept unit below maximum health within Heal's range, else one drawn unit of its own Player for a
    buff (`AI-785`, `AI-786`); the heal arm targets the first listed damaged unit (`AI-789`). Callers,
-   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`. No count of units on a spell's cells enters the choice (`AI-796`, Medium); the session-list cast routine that picks a unit on a cell is `AI-797` (the list entries are not decoded; that it is not a computer unit's cast is Medium).
+   the null-target search and the per-spell routes: `AI-784`, `AI-787`, `AI-788`. No count of units on a spell's cells enters the choice (`AI-796`, Medium; each of the five `R0020` calls in the six chain windows centres on the actor's own cell, `AI-862`); the session-list cast routine that picks a unit on a cell is `AI-797` (the list entries are not decoded; that it is not a computer unit's cast is Medium).
 
 **Sight decides the population and reach decides the pick.** An engine that acquires on sight
 alone starts fights the game does not; one that scans only within reach acquires through walls,
@@ -63,14 +63,15 @@ Prismatic rank differs from ordinary acquisition. List A uses
 `((edgeDistance<<8)+turnCost)&0xffff`; list B uses
 `((((edgeDistance<<8)+turnCost)&0xffff)<<8)`. Repeated strict-minimum scans preserve source order on
 equal stored scores. Selection first requires a score below 65530 and append later requires the
-saved threshold below 65000. A low enough B score can therefore compete beside living A; whether a
-valid layout can supply the required edge distance is Unknown. If there are no living entries, the
+saved threshold below 65000. A B score below that bound needs an edge distance that is a multiple of 256; with
+footprint sizes of at least 1 the distance is at most 255, so no B corpse is selected
+beside living A (`AI-863`, Medium: the footprint getter is unread). If there are no living entries, the
 builder has already moved B back into A and the only-corpses population uses the A formula. The
 spell's capped byte limits the final output list after ranking; it is neither actor reach nor order
 `+0x14`, and the primary consumes one position on the ranked path. When the builder returns empty A, the selector instead
 appends the primary and returns before reading the cap. Its stack pointer region holds 100 entries
 and its winner/threshold regions ten; neither population overflow nor a custom cap above ten is
-checked. Candidate scores are session scratch at `+0xd74`, whose capacity is Unknown.
+checked. Candidate scores are scratch at `+0xd74` of the object at `[L00004]`, allocated with 0xc320 bytes, so at most 11627 dwords; the capacity itself is Unknown (`AI-871`).
 
 ### The sight stamp, complete (`AI-GROUPSEE-068`, `AI-LOS-087`…`AI-LOS-091`, `AI-SIGHT-092`…`AI-SIGHT-094`; the writer count of `AI-SIGHT-092` is partially retracted)
 
@@ -134,7 +135,7 @@ partially retracted, the four Light and Darkness apply and remove stores (`MAGIC
 `L17538` in `R0840` (`HERO-MOD-016`) and `L17539` in `R0843`. A
 `disp:a5` sweep sees two of the six; the seven `+0xa5` byte reads it lists include the stamp
 seed (`MAGIC-444`). A Humanoid derive keeps Darkness's reduction through `+0xe4`
-(`MAGIC-445`). The Darkness tail that stores the caster has no comparison of caster and unit (`AI-829`; Medium that the area loops pass the caster).
+(`MAGIC-445`). The Darkness tail that stores the caster has no comparison of caster and unit (`AI-829`). The three area loops pass their own area object, which carries the caster in `+0x3c` when the caster's own `+0x3c` is nonzero at the cast (`AI-867`; Medium for later stages).
 
 **Light and Darkness shrink the stamp.** Light lowers a reached plain Unit's sight, and Darkness a
 reached Humanoid's or Human's, by p/30 + 1 whole cells, so the stamp's seed and the candidate set
@@ -162,7 +163,7 @@ and they were not entered. The invisibility filter `R0021`, called by engage and
 setter, applies a group detection range to invisible victims. A weapon carrier stops at its reach
 and a book caster at the spell's stop distance with no sight-map test on these routines. The
 cast setter given no target takes the first hostile of its mover-radius square, filtered for
-relation and invisibility, with no sight map (`AI-718`, Medium).
+relation and invisibility, with no sight map (`AI-718`, Medium). The executor body holds two timer-import calls and two table jumps, and the admission body and three direct callees of the admission hold one `vt+0x1c` size-getter call; engage, the cast setter and the gate hold none (`AI-868`, Medium: the getter's targets, the jump targets, the executor's direct callees and the callees of `R0269` are unread).
 
 No target path filters at −10 health. A body below 1 health stays a fallback target until its
 dying arm, the countdown spent, finds health at or below −10, tears it down and the world step
@@ -217,8 +218,8 @@ On total refusal — no candidate within reach survives the filters — the orde
 candidate-found branch, and the no-candidate exit never touches it (`AI-328`). The same happens on
 the found path when the engagement-suppression clause above fires: the target is written, then the
 order kind is put back to `0` (`AI-GUARD-007`). Inside the scan itself, the order kind and the flag
-that triggered the re-scan are the only fields reset; the AI-owner exit then calls one routine that
-`AI-328` does not cover, so what the whole tick resets is a wider question than this page answers.
+that triggered the re-scan are the only fields reset; the AI-owner exit then calls `R0205`, an idle turn that stores `actor+0x54`, `ord+0x54` and
+the second facing byte and calls the turn routine `R0056` (`AI-864`; `R0056` is unread, Medium).
 
 ## What the group-level scorers call
 
@@ -239,12 +240,16 @@ the group arms never consult.
 
 The block builder the computer's Heal routine uses appends occupants centre cell first with no identity test (High), so its candidate list can hold the caster (Medium); at full health the caster is never the pick. — AI-800
 
-A blow whose roll fails still records the attacker in the victim's `+0x40` when the attacker is set (High for the resolver body, Medium that nothing else writes it). — AI-801
+A blow whose roll fails still records the attacker in the victim's `+0x40` when the attacker is set (High for the resolver body). A census of 246 `disp:0x40` stores finds no other store in the direct-call closure of the resolver to depth 8 or in the three callers above it; indirect calls and copies are unread, so the absence is Medium (AI-869). — AI-801
 
-A staged area spell's first stage runs one world step after the applying step, then every 3 steps (Medium). — MAGIC-463
+A staged area spell's first stage runs one world step after the applying step, then every 3 steps (Medium). The cast arm registers the area object through a list append with no drive call, and the DirectDamage `vt+0x3c` body subtracts health in the stage call (AI-870). — MAGIC-463
 
-A refused flee walk under explicit Retreat hands the unit to the reacquisition above, which strikes a hostile at reach when the in-position gate passes (Medium: composed from listings; the gate is unread). — AI-798
+A refused flee walk under explicit Retreat hands the unit to the reacquisition above, which strikes a hostile at reach when the in-position gate passes (Medium: composed from listings). — AI-798
+
+The in-position gate passes when the direction helper's result equals the actor's facing byte and the edge distance is at most the reach byte. — AI-865
+
+The block builder's cell lookup returns slot `+4` of the cell record, which names the actor of movement domain 1 or 2, so a domain-3 caster is not in the Heal list; a slot `+4` caster is, when registered in its cell's record (Medium). Whether domain 3 is the flier class is Medium (MOVE-DOM-024). — AI-866
 
 ## Defender ranking, distance, group ties and retreat detection (first game)
 
-Cover engages the nearest flier when one remains, else the nearest unit, and removes fliers when the protected unit's reach is below 2 (AI-812). Distance there and in the invisibility test is edge to edge in sub-cell steps (AI-813). A group scorer keeps the first of equal costs (AI-814). An invisible enemy stays a candidate of the retreat check when any groupmate's See-invisible byte reaches that distance (AI-815). The filter `R0021` stores list-node words through its list argument (read as candidate links, Medium), has no order-word store in its own instructions, and calls `R0036` and `R1355` (AI-849).
+Cover engages the nearest flier when one remains, else the nearest unit, and removes fliers when the protected unit's reach is below 2 (AI-812). The block builder and the engage routine load none of the six health and state offsets searched, so a unit that is still in a cell record is a candidate whatever its health (AI-872; Medium: the other engage callees and the cell record of a dying unit are unread). The block builder lists slot `+4` only, so the flier branch is reached only by a slot `+4` unit whose `vt+0x20` is 3, which is unread (AI-866). Distance there and in the invisibility test is edge to edge in sub-cell steps (AI-813). A group scorer keeps the first of equal costs (AI-814). An invisible enemy stays a candidate of the retreat check when any groupmate's See-invisible byte reaches that distance (AI-815). The filter `R0021` stores list-node words through its list argument (read as candidate links, Medium), has no order-word store in its own instructions, and calls `R0036` and `R1355` (AI-849).

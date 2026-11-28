@@ -693,7 +693,7 @@ A Teleport scroll used in melee installs only after the strike leaves progress 1
 
 The computer mage's Heal list is built centre cell first with no identity test (High); whether it holds the caster is Medium. — AI-800
 
-A staged area spell cast by an order lands its first stage one world step after the applying step (Medium: the registration caller is unread). — MAGIC-463
+A staged area spell cast by an order lands its first stage one world step after the applying step (Medium: the registration is a list append with no drive call, AI-870; the area pass list rests on MAGIC-463). — MAGIC-463
 
 ## Scan radii of guard, defender and retreat (first game)
 
@@ -704,3 +704,5 @@ The retreat predicates keep an invisible enemy when any groupmate's See-invisibl
 The defender arm hands the protected unit to cover when `actor+0x140` is zero; with a spell book it first tries the `R0305` spell branch, and cover runs when no spell is chosen. Cover engages the nearest flier if one remains, else the nearest unit. — AI-812
 
 Cover and the invisibility test measure distance edge to edge in sub-cell steps. — AI-813
+
+Each of the five `R0020` calls in the six cast-chain windows gathers occupants around the actor's own cell (AI-862; AI-796, Medium). A Heal list holds a slot `+4` caster (movement domain 1 or 2) only when registered in its cell record (AI-866; AI-800, Medium). The reacquisition's in-position gate tests facing against direction and distance against reach (AI-865; AI-798), and its AI-owned no-winner exit stores `ord+8` = 0xb and runs the idle turn `R0205` (AI-864). The executor body holds two timer-import calls and two table jumps, and the admission body one size-getter call; the executor's direct callees are unread (AI-868, Medium). The Darkness area loops pass the area object that carries the caster, for the first stage and for later stages while the caster's `+0x14` is nonzero (AI-867, Medium for later stages). The candidate list of cover and engage is built by bodies that load none of the six health and state offsets searched (AI-872; AI-812, Medium).

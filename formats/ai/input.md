@@ -295,4 +295,6 @@ separate boundaries. — AI-SPELLITEM-290
 
 ## Retreat with a refused flee route
 
-An explicit Retreat order whose flee walk is refused is followed by a strike on a hostile at reach when the in-position gate passes, not by flight (Medium: composed from listings; the gate is unread). — AI-798
+An explicit Retreat order whose flee walk is refused is followed by a strike on a hostile at reach when the in-position gate passes, not by flight (Medium: composed from listings; the gate tests facing and reach, AI-865). — AI-798
+
+A refused reacquisition of an AI-owned unit leaves the target pointer and runs an idle turn (AI-864).

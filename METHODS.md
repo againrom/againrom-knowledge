@@ -8,16 +8,27 @@ Each claim ID in the ledgers carries one label for how its finding was acquired.
 
 Retracted claims keep their label and show their ledger status.
 
-Claims labelled: 5484. Observation: 143. Static analysis: 4595. Mixed: 746.
+Claims labelled: 5495. Observation: 143. Static analysis: 4606. Mixed: 746.
 
 ## Ledger ai
 
 | ID | Method | Status |
 |---|---|---|
+| AI-862 | static analysis | ● active |
+| AI-863 | static analysis | ● active (amended) |
+| AI-864 | static analysis | ● active |
+| AI-865 | static analysis | ● active |
+| AI-866 | static analysis | ● active |
+| AI-867 | static analysis | ● active |
+| AI-868 | static analysis | ● active |
+| AI-869 | static analysis | ● active |
+| AI-870 | static analysis | ● active |
+| AI-871 | static analysis | ● active |
+| AI-872 | static analysis | ● active |
 | AI-826 | static analysis | ● active |
 | AI-827 | static analysis | ● active |
 | AI-828 | static analysis | ● active |
-| AI-829 | static analysis | ● active |
+| AI-829 | static analysis | ● active (amended) |
 | AI-830 | static analysis | ● active |
 | AI-831 | static analysis | ● active |
 | AI-832 | static analysis | ● active |
@@ -25,7 +36,7 @@ Claims labelled: 5484. Observation: 143. Static analysis: 4595. Mixed: 746.
 | AI-834 | static analysis | ● active |
 | AI-810 | static analysis | ● active |
 | AI-811 | static analysis | ● active |
-| AI-812 | static analysis | ● active |
+| AI-812 | static analysis | ● active (amended) |
 | AI-813 | static analysis | ● active |
 | AI-814 | static analysis | ● active |
 | AI-815 | static analysis | ● active |
@@ -60,8 +71,8 @@ Claims labelled: 5484. Observation: 143. Static analysis: 4595. Mixed: 746.
 | AI-RETREAT-273 | static analysis | ● active |
 | AI-RETREAT-274 | static analysis | ● active |
 | AI-RETREAT-275 | static analysis | ● active |
-| AI-SPRAY-266 | static analysis | ● active |
-| AI-SPRAY-267 | static analysis | ● active |
+| AI-SPRAY-266 | static analysis | ● active (amended) |
+| AI-SPRAY-267 | static analysis | ● active (amended) |
 | AI-INPUT-121 | static analysis | ● active |
 | AI-SELECT-122 | mixed | ● active |
 | AI-PANEL-123 | static analysis | ● active |
@@ -182,7 +193,7 @@ Claims labelled: 5484. Observation: 143. Static analysis: 4595. Mixed: 746.
 | AI-CMDSET45-108 | static analysis | ● active |
 | AI-BB4SWEEP-109 | static analysis | ● active |
 | AI-CANDBYTE-110 | static analysis | ● active |
-| AI-DEFEND-111 | static analysis | ● active |
+| AI-DEFEND-111 | static analysis | ● active (amended) |
 | AI-FOLLOW-112 | static analysis | ● active |
 | AI-FOLLOWTAB-113 | static analysis | ● active |
 | AI-FOLLOWGAP-114 | static analysis | ● active |
@@ -537,10 +548,10 @@ Claims labelled: 5484. Observation: 143. Static analysis: 4595. Mixed: 746.
 | AI-792 | static analysis | ● active (branch candidate) |
 | AI-793 | static analysis | ● active (branch candidate) |
 | AI-794 | mixed | ● active (branch candidate) |
-| AI-798 | static analysis | ● active |
+| AI-798 | static analysis | ● active (amended) |
 | AI-799 | static analysis | ● active |
-| AI-800 | static analysis | ● active |
-| AI-801 | static analysis | ● active |
+| AI-800 | static analysis | ● active (amended) |
+| AI-801 | static analysis | ● active (amended) |
 
 ## Ledger alm
 
@@ -1602,7 +1613,7 @@ Claims labelled: 5484. Observation: 143. Static analysis: 4595. Mixed: 746.
 | MAGIC-474 | static analysis | ● active |
 | MAGIC-475 | static analysis | ● active |
 | MAGIC-476 | static analysis | ● active |
-| MAGIC-463 | static analysis | ● active |
+| MAGIC-463 | static analysis | ● active (amended) |
 | MAGIC-464 | static analysis | ● active |
 | MAGIC-465 | static analysis | ● active |
 
